@@ -1,24 +1,29 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function Register({ onRouteChange, loadUserInfo }) {
-  const [name, setName] = useState("");
+export default function RegisterPage(props) {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
-  function onNameChange(e) {
+  const navigate = useNavigate();
+
+  const onNameChange = (e) => {
     setName(e.target.value);
-  }
+  };
 
-  function onEmailChange(e) {
+  const onEmailChange = (e) => {
     setEmail(e.target.value);
-  }
+  };
 
-  function onPasswordChange(e) {
+  const onPasswordChange = (e) => {
     setPassword(e.target.value);
-  }
+  };
 
-  function onRegister() {
-    fetch("http://localhost:3000/register", {
+  const onRegister = async (e) => {
+    e.preventDefault();
+
+    const resp = await fetch("http://localhost:3000/register", {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -26,21 +31,20 @@ function Register({ onRouteChange, loadUserInfo }) {
         email: email,
         password: password,
       }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.id) {
-          loadUserInfo(data);
-          onRouteChange("home");
-        }
-      });
-  }
+    });
+    const data = await resp.json();
+
+    if (data.email) {
+      props.setUserInfo(data);
+      navigate("/notes");
+    }
+  };
 
   return (
-    <main className="pa4 black-80">
-      <form className="measure center">
+    <main className="box pa4 black-80">
+      <form className="measure center" onSubmit={onRegister}>
         <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
-          <legend className="f4 fw6 ph0 mh0">Create an account with us</legend>
+          <legend className="f4 fw6 ph0 mh0">Create an account</legend>
           <div className="mv3">
             <label className="db fw6 lh-copy f6" htmlFor="name">
               What's your name?
@@ -48,6 +52,7 @@ function Register({ onRouteChange, loadUserInfo }) {
             <input
               onChange={onNameChange}
               className="b pa2 input-reset ba bg-transparent w-100"
+              value={name}
               type="text"
               name="name"
               id="name"
@@ -60,6 +65,7 @@ function Register({ onRouteChange, loadUserInfo }) {
             <input
               onChange={onEmailChange}
               className="pa2 input-reset ba bg-transparent w-100"
+              value={email}
               type="email"
               name="email-address"
               id="email-address"
@@ -72,6 +78,7 @@ function Register({ onRouteChange, loadUserInfo }) {
             <input
               onChange={onPasswordChange}
               className="b pa2 input-reset ba bg-transparent w-100"
+              value={password}
               type="password"
               name="password"
               id="password"
@@ -79,16 +86,11 @@ function Register({ onRouteChange, loadUserInfo }) {
           </div>
         </fieldset>
         <div className="">
-          <input
-            onClick={onRegister}
-            className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
-            type="submit"
-            value="Register"
-          />
+          <button className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib">
+            Sign up
+          </button>
         </div>
       </form>
     </main>
   );
 }
-
-export default Register;
